@@ -4,6 +4,9 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const WebSocket = require("ws");
 
+// Импорт модели пользователя
+const User = require("./models/User");
+
 const app = express();
 const PORT = 5000;
 
@@ -18,14 +21,6 @@ mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Подключено к MongoDB"))
   .catch((error) => console.error("Ошибка подключения к MongoDB:", error));
-
-// Определение схемы и модели пользователя
-const userSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-const User = mongoose.model("User", userSchema);
 
 // Регистрация
 app.post("/register", async (req, res) => {
