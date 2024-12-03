@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const WebSocket = require("ws");
 
 const app = express();
@@ -11,45 +12,68 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(cors({ origin: "http://localhost:3000" }));
 
-let users = []; // Локальное хранилище пользователей
+// Подключение к MongoDB
+const MONGO_URI = "mongodb+srv://slavaen2410:kisusha2410@login-page.llwgi.mongodb.net/login_page_db?retryWrites=true&w=majority";
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("Подключено к MongoDB"))
+  .catch((error) => console.error("Ошибка подключения к MongoDB:", error));
+
+// Определение схемы и модели пользователя
+const userSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+const User = mongoose.model("User", userSchema);
 
 // Регистрация
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
   const { email, password } = req.body;
   console.log(`Получены данные: email - ${email}, password - ${password}`);
 
-  if (users.find((user) => user.email === email)) {
-    return res.status(400).json({ message: "Пользователь уже существует" });
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Пользователь уже существует" });
+    }
+
+    const passwordRegex = /^(?=.*\d)(?!.*[^\w\d\s]).+$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Пароль должен содержать хотя бы одну цифру и не должен включать специальные символы.",
+      });
+    }
+
+    const newUser = new User({ email, password });
+    await newUser.save();
+
+    console.log("Пользователь успешно зарегистрирован:", newUser);
+    res.status(200).json({ message: "Регистрация успешна" });
+  } catch (error) {
+    console.error("Ошибка регистрации пользователя:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
   }
-
-  const passwordRegex = /^(?=.*\d)(?!.*[^\w\d\s]).+$/;
-  if (!passwordRegex.test(password)) {
-    return res.status(400).json({
-      message:
-        "Пароль должен содержать хотя бы одну цифру и не должен включать специальные символы.",
-    });
-  }
-
-  users.push({ email, password });
-  console.log("Пользователи после регистрации:", users);
-
-  res.status(200).json({ message: "Регистрация успешна" });
 });
 
 // Логин
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   console.log(`Попытка входа: email - ${email}, password - ${password}`);
 
-  const user = users.find(
-    (user) => user.email === email && user.password === password
-  );
-  if (!user) {
-    return res.status(400).json({ message: "Неверный email или пароль" });
-  }
+  try {
+    const user = await User.findOne({ email, password });
+    if (!user) {
+      return res.status(400).json({ message: "Неверный email или пароль" });
+    }
 
-  console.log(`Пользователь ${email} вошел в систему`);
-  res.status(200).json({ message: "Вход выполнен успешно" });
+    console.log(`Пользователь ${email} вошел в систему`);
+    res.status(200).json({ message: "Вход выполнен успешно" });
+  } catch (error) {
+    console.error("Ошибка входа пользователя:", error);
+    res.status(500).json({ message: "Ошибка сервера" });
+  }
 });
 
 // WebSocket сервер
@@ -72,7 +96,9 @@ wss.on("connection", (ws) => {
 function broadcastActiveConnections() {
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ type: "connectionCount", count: activeConnections }));
+      client.send(
+        JSON.stringify({ type: "connectionCount", count: activeConnections })
+      );
     }
   });
 }
