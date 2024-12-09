@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const WebSocket = require("ws");
+const userRoutes = require("./routes/userRoutes");
 
 // Импорт модели пользователя
 const User = require("./models/User");
@@ -14,6 +15,7 @@ const PORT = 5000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cors({ origin: "http://localhost:3000" }));
+app.use("/api/users", userRoutes);
 
 // Подключение к MongoDB
 const MONGO_URI = "mongodb+srv://slavaen2410:kisusha2410@login-page.llwgi.mongodb.net/login_page_db?retryWrites=true&w=majority";
