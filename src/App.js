@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/HomePage"; // Новая страница
 import LoginPage from "./pages/LoginPage";
+import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage";
 import ChatButton from "./components/ChatButton";
 import ChatWindow from "./components/ChatWindow";
@@ -30,9 +31,10 @@ function App() {
       <GoogleAnalytics />
       <Header />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
       </Routes>
       <ChatButton toggleChat={toggleChat} />
       {isChatOpen && <ChatWindow />}

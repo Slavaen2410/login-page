@@ -7,7 +7,6 @@ function RegisterPage() {
   const [message, setMessage] = useState("");
 
   const handleRegister = async () => {
-    // Валидация пароля (минимум одна цифра и без символов)
     const passwordRegex = /^(?=.*\d)(?!.*[^\w\d\s]).+$/;
     if (!passwordRegex.test(password)) {
       setMessage("Пароль должен содержать хотя бы одну цифру и не должен включать специальные символы.");
@@ -16,46 +15,96 @@ function RegisterPage() {
 
     try {
       const response = await axios.post("http://localhost:5000/register", { email, password });
-      setMessage(response.data.message); // Успешный ответ
+      setMessage(response.data.message);
     } catch (error) {
-      // Проверка наличия error.response
       if (error.response && error.response.data && error.response.data.message) {
-        setMessage(error.response.data.message); // Сообщение от сервера
+        setMessage(error.response.data.message);
       } else {
-        setMessage("Ошибка сети. Проверьте подключение к серверу."); // Проблема с сетью
+        setMessage("Ошибка сети. Проверьте подключение к серверу.");
       }
     }
   };
 
   return (
     <div style={styles.container}>
-      <h1>Register</h1>
-      <input
-        style={styles.input}
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        style={styles.input}
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button style={styles.button} onClick={handleRegister}>
-        Зарегистрироваться
-      </button>
-      {message && <p>{message}</p>}
+      <div style={styles.formContainer}>
+        <h1 style={styles.title}>Register</h1>
+        <input
+          style={styles.input}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          style={styles.input}
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button style={styles.button} onClick={handleRegister}>
+        Submit
+        </button>
+        {message && <p style={styles.message}>{message}</p>}
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container: { padding: "20px" },
-  input: { marginBottom: "10px", padding: "10px", width: "100%" },
-  button: { padding: "10px 20px", backgroundColor: "#007bff", color: "#fff", border: "none" },
+  container: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+    backgroundColor: "#f7f7f7",
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: "400px",
+    padding: "20px",
+    backgroundColor: "#fff",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    textAlign: "center",
+    boxSizing: "border-box", // Добавляем для предотвращения выхода элементов за пределы
+  },
+  title: {
+    fontSize: "24px",
+    marginBottom: "20px",
+    color: "#333",
+    fontWeight: "bold", // Сделаем заголовок более заметным
+  },
+  input: {
+    width: "100%", // Занимает всю доступную ширину
+    padding: "12px",
+    marginBottom: "15px",
+    border: "1px solid #ccc",
+    borderRadius: "4px",
+    fontSize: "16px",
+    boxSizing: "border-box", // Добавляем для контроля за размерами и отступами
+  },
+  button: {
+    width: "100%",
+    padding: "12px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "4px",
+    fontSize: "16px",
+    cursor: "pointer",
+    boxSizing: "border-box", // Применяем тот же подход для кнопки
+  },
+  buttonHover: {
+    backgroundColor: "#0056b3",
+  },
+  message: {
+    marginTop: "15px",
+    fontSize: "14px",
+    color: "#ff0000",
+  },
 };
+
 
 export default RegisterPage;

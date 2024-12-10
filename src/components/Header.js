@@ -5,9 +5,10 @@ function Header() {
   return (
     <header style={styles.header}>
       <div style={styles.nav}>
+        <Link to="/home" style={styles.link}>Home</Link>
         <Link to="/login" style={styles.link}>Login</Link>
         <Link to="/register" style={styles.link}>Register</Link>
-        <Link to="/profile/123" style={styles.link}>Profile</Link> {/* Пример глубокой ссылки */}
+        <Link to="/profile/123" style={styles.link}>Profile</Link>
       </div>
     </header>
   );
